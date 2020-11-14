@@ -28,6 +28,8 @@ class String {
         char* str_;
 };
 
+bool operator<(const String& lhs, const String& rhs);
+
 std::ostream& operator<<(std::ostream& os, const String& str);
 
 #endif

@@ -53,6 +53,10 @@ const char * String::c_str() const {
     return str_;
 }
 
+bool operator<(const String& lhs, const String& rhs) {
+    return std::strcmp(lhs.c_str(), rhs.c_str()) < 0;
+}
+
 std::ostream& operator<<(std::ostream& os, const String& str) {
     return os << str.c_str();
 }
