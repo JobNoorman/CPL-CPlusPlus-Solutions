@@ -41,21 +41,17 @@ void fizzbuzz() {
     std::cout << '\n';
 }
 
-constexpr bool strequal(const char* s1, const char* s2) {
+constexpr bool equal(unsigned u1, unsigned u2) {
+    return u1 == u2;
+}
+
+constexpr bool equal(const char* s1, const char* s2) {
     while (*s1 != '\0' && *s2 != '\0' && *s1 == *s2) {
         ++s1;
         ++s2;
     }
 
     return *s1 == *s2;
-}
-
-constexpr bool equal(unsigned u1, unsigned u2) {
-    return u1 == u2;
-}
-
-constexpr bool equal(const char* s1, const char* s2) {
-    return strequal(s1, s2);
 }
 
 static_assert(equal(FizzBuzz< 1>::value, 1u));

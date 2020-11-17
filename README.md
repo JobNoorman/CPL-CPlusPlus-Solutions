@@ -8,6 +8,9 @@
 - [Visitor pattern](#visitor-pattern)
   - [Value hierarchy](#value-hierarchy)
   - [Visiting](#visiting)
+- [FizzBuzz](#fizzbuzz)
+  - [Compile-time string equality](#compile-time-string-equality)
+  - [Compile-time FizzBuzz](#compile-time-fizzbuzz)
 
 # Setup
 
@@ -293,6 +296,117 @@ The goals of this class is to write a JSON representation of a `Value` (and all 
 > ```
 > Here, `i` and `d` will be references to the values in `p`.
 
+# FizzBuzz
+
+As should be clear by now, no self-respecting CPL exercise session can ignore the important [FizzBuzz][fizzbuzz] challenge.
+However, we will give it a C++-twist here and do something that, AFAIK, neither Rust nor WebAssembly can do: calculate FizzBuzz at compile-time.
+Our end-goal is to make the following code compile:
+```cpp
+static_assert(equal(FizzBuzz< 1>::value, 1u));
+static_assert(equal(FizzBuzz< 2>::value, 2u));
+static_assert(equal(FizzBuzz< 3>::value, "Fizz"));
+static_assert(equal(FizzBuzz< 4>::value, 4u));
+static_assert(equal(FizzBuzz< 5>::value, "Buzz"));
+static_assert(equal(FizzBuzz< 6>::value, "Fizz"));
+static_assert(equal(FizzBuzz< 7>::value, 7u));
+static_assert(equal(FizzBuzz< 8>::value, 8u));
+static_assert(equal(FizzBuzz< 9>::value, "Fizz"));
+static_assert(equal(FizzBuzz<10>::value, "Buzz"));
+static_assert(equal(FizzBuzz<11>::value, 11u));
+static_assert(equal(FizzBuzz<12>::value, "Fizz"));
+static_assert(equal(FizzBuzz<13>::value, 13u));
+static_assert(equal(FizzBuzz<14>::value, 14u));
+static_assert(equal(FizzBuzz<15>::value, "FizzBuzz"));
+static_assert(equal(FizzBuzz<16>::value, 16u));
+static_assert(equal(FizzBuzz<17>::value, 17u));
+static_assert(equal(FizzBuzz<18>::value, "Fizz"));
+static_assert(equal(FizzBuzz<19>::value, 19u));
+static_assert(equal(FizzBuzz<20>::value, "Buzz"));
+```
+
+[`static_assert`][static_assert] is an assertion that is evaluated at compile-time.
+This means that if its argument evaluates to `false`, a compilation error will be generated.
+
+The main goal of this exercise is to create a template class who's forward declaration looks like this:
+```cpp
+template<unsigned N>
+struct FizzBuzz;
+```
+
+Depending on the value of `N`, this class should either have a `value` member of type `unsigned` equal to `N`, or of type `const char*` equal to `"Fizz"`, `"Buzz"`, or `"FizzBuzz"`.
+Yes, varying the type of a member based on template parameters is possible in C++.
+
+## Compile-time string equality
+
+First things first: to evaluate the `static_assert`s above, we need a way to compare strings at compile time.
+Since C++11, C++ supports the [`constexpr`][constexpr] specifier that allows us to create, among others, variables and functions that _could_ be evaluated at compile time.
+I say _could_ because these functions may also be used at run-time; only if they are provided with compile-time constants as arguments, they can be evaluated at run-time.
+
+Initially, `constexpr` functions where very restricted and could essentially contain a single `return` statement.
+They were allowed to be recursive, though, so this could be used to implement our compile-time string equality check.
+Fortunately, C++17 relaxed the requirements on `constexpr` functions and they can now contain almost everything except `goto`s and `try`-blocks.
+
+Implement a string equality function with the following signature:
+```cpp
+constexpr bool equal(const char* s1, const char* s2);
+```
+
+Verify your implementation by writing some `static_assert`s.
+
+Also make an overload of this function that accepts `unsigned` parameters.
+
+## Compile-time FizzBuzz
+
+The challenge here is to make the `FizzBuzz` class have a different implementation based on the value of `N`.
+We've already seen a basic way of doing this: template specialization.
+For example:
+```cpp
+template<unsigned N>
+struct FizzBuzz {
+    constexpr static unsigned value = N;
+};
+
+template<>
+struct FizzBuzz<3> {
+    constexpr static const char* value = "Fizz";
+};
+```
+
+> :bulb: Like in Java, the `static` specifier makes a variable a class-member.
+> This means we don't need an object to access it.
+> `static` members in C++ can be accessed using `ClassName::member`.
+
+However, we obviously don't want to manually add specializations for all multiples of 3 and 5.
+For one, this would be boring.
+Also, it would only allow us to calculate a fixed number of FizzBuzz values.
+
+I will give a hint about a possible solution and then leave the joy of solving this challenge up to you.
+
+Let's say we want to design a matrix class with compile-time size parameters.
+Of course, we would like this class to have a `determinant` method only if the matrix is square.
+This could be done using specialization as follows:
+```cpp
+template<typename T, unsigned Rows, unsigned Cols, bool IsSquare>
+struct MatrixMixins {};
+
+template<typename T, unsigned Rows, unsigned Cols>
+struct MatrixMixins<T, Rows, Cols, true> {
+    T determinant() {
+        // Calculate determinant
+    }
+
+    // Other methods specific to square matrices
+};
+
+template<typename T, unsigned Rows, unsigned Cols>
+struct Matrix : MatrixMixins<T, Rows, Cols, /*IsSquare=*/Rows == Cols> {
+    // General matrix methods go here
+};
+
+Matrix<int, 1, 2>().determinant(); // compiler error
+Matrix<int, 2, 2>().determinant(); // ok
+```
+
 [gcc]: https://gcc.gnu.org/
 [mingw]: http://www.mingw.org/
 [clang]: https://clang.llvm.org/
@@ -331,3 +445,6 @@ The goals of this class is to write a JSON representation of a `Value` (and all 
 [map insert]: https://en.cppreference.com/w/cpp/container/map/insert
 [structured binding]: https://en.cppreference.com/w/cpp/language/structured_binding
 [forward declaration]: https://en.wikipedia.org/wiki/Forward_declaration
+[fizzbuzz]: https://en.wikipedia.org/wiki/Fizz_buzz
+[static_assert]: https://en.cppreference.com/w/cpp/language/static_assert
+[constexpr]: https://en.cppreference.com/w/cpp/language/constexpr
