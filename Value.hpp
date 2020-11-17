@@ -53,17 +53,33 @@ public:
 class SeqValue : public Value {
 public:
 
-    std::vector<std::unique_ptr<Value>> values;
-
     void accept(ValueVisitor& visitor) const override;
+
+    void push_back(std::unique_ptr<Value> v);
+
+    using Iterator = std::vector<std::unique_ptr<Value>>::const_iterator;
+    Iterator begin() const;
+    Iterator end() const;
+
+private:
+
+    std::vector<std::unique_ptr<Value>> values;
 };
 
 class StructValue : public Value {
 public:
 
-    std::map<String, std::unique_ptr<Value>> values;
-
     void accept(ValueVisitor& visitor) const override;
+
+    void insert(String key, std::unique_ptr<Value> v);
+
+    using Iterator = std::map<String, std::unique_ptr<Value>>::const_iterator;
+    Iterator begin() const;
+    Iterator end() const;
+
+private:
+
+    std::map<String, std::unique_ptr<Value>> values;
 };
 
 #endif

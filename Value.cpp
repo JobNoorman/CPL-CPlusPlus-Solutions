@@ -25,6 +25,30 @@ void SeqValue::accept(ValueVisitor& visitor) const {
     visitor.visit(*this);
 }
 
+void SeqValue::push_back(std::unique_ptr<Value> v) {
+    values.push_back(std::move(v));
+}
+
+SeqValue::Iterator SeqValue::begin() const {
+    return values.begin();
+}
+
+SeqValue::Iterator SeqValue::end() const {
+    return values.end();
+}
+
 void StructValue::accept(ValueVisitor& visitor) const {
     visitor.visit(*this);
+}
+
+void StructValue::insert(String key, std::unique_ptr<Value> v) {
+    values.insert({std::move(key), std::move(v)});
+}
+
+StructValue::Iterator StructValue::begin() const {
+    return values.begin();
+}
+
+StructValue::Iterator StructValue::end() const {
+    return values.end();
 }

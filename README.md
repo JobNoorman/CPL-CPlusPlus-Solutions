@@ -5,6 +5,9 @@
   - [Copying](#copying)
   - [Moving](#moving)
   - [Iterating](#iterating)
+- [Visitor pattern](#visitor-pattern)
+  - [Value hierarchy](#value-hierarchy)
+  - [Visiting](#visiting)
 
 # Setup
 
@@ -212,6 +215,84 @@ Verify that your implementation works by using it in, for example, [range-based 
 
 > :bulb: Remember that pointers are iterators.
 
+# Visitor pattern
+
+In this exercise, we'll implement the [visitor pattern][visitor] to generate [JSON][json] from a class hierarchy representing generic values.
+
+## Value hierarchy
+
+Implement the classes described below in [`Value.hpp`](Value.hpp) and [`Value.cpp`](Value.cpp).
+
+Start with implementing a class hierarchy to represent values.
+The abstract base class `Value` should not currently contain any methods but make sure it's safe to use as a base class.
+To ensure this class cannot be constructed, you could mark its default constructor as `protected`.
+
+The following concrete subclasses should be defined:
+- `BoolValue`: Wrapper around a `bool`.
+  Should have a constructor accepting a `bool` and a getter returning it.
+- `IntValue`, `StringValue`: Similar to `BoolValue` except for wrapping an `int` and a `String` respectively.
+  Use the `String` class created in the previous exercise.
+- `SeqValue`: Represents an ordered sequence of `Value`s.
+  Chose an appropriate [container][containers] that allows elements to be added.
+  The container should store `Value`s inside a [`std::unique_ptr`][unique_ptr].
+  Add a method to add a value to the sequence.
+  Also make sure you can iterate over the values (immutable iteration is enough).
+  > :bulb: You can just use the iterators of the underlying container.
+  > Iterators of STL containers can have very long and annoying names to spell, though.
+  > You can make your life easier by using a [_type alias_][type alias].
+  > For example:
+  > ```cpp
+  > using IntIterator = std::vector<int>::const_iterator;
+  > ```
+- `StructValue`: Represents a mapping from `String`s to `Value`s, again storing the values inside a `std::unique_ptr`.
+  There are two types of map that you can use in C++:
+  - [`std::map<K, V>`][map]: Map that sorts its elements based on the key.
+    This means that `K` should have `operator<` overloaded.
+  - [`std::unordered_map<K, V>`][unordered_map]: Hash-map that requires [`std::hash`][hash] to be specialized for `K`.
+
+  Since our custom `String` class will be used as the key, support has to be added for either of those maps.
+  The easiest to support would be `std::map`.
+
+  Both maps represent their key-value mapping as pairs; that is, as [`std::pair<K, V>`][pair].
+  Elements can be added as a pair using [`insert`][map insert] and their iterators iterate over pairs.
+  > :bulb: Note that all containers have a type alias called `value_type` to represents the underlying value.
+  > For maps this is `std::pair<K, V>`.
+
+  Add methods to insert new values and to iterate (immutably) over the existing ones.
+
+## Visiting
+
+Now add an abstract class called `ValueVisitor` in [`ValueVisitor.hpp`](#ValueVisitor.hpp) that defines pure-virtual `visit` methods for all concrete value classes described above.
+Also implement the necessary `accept` methods in the `Value` hierarchy.
+
+> :bulb: You will now run into an annoying circular dependency between `ValueVisitor` (which needs to know the concrete `Value` subclasses) and `Value` (which needs to know `ValueVisitor` for `accept`).
+> Simply having each header `#include` the other will not work (why not?).
+> You can break this circle by [_forward declaring_][forward declaration] some classes.
+> For example:
+> ```cpp
+> class ValueVisitor;
+> ```
+> This tells the compiler "there exists a class called ValueVisitor".
+> From this point on, it is legal to declare pointers or references to a `ValueVisitor`.
+> You cannot dereference them, though, as the compiler needs to know the contents of the class for that.
+
+Make a class called `JsonWriter` in [`JsonWriter.hpp`](JsonWriter.hpp) and [`JsonWriter.cpp`](JsonWriter.cpp) that implements the `ValueVisitor` interface.
+The goals of this class is to write a JSON representation of a `Value` (and all its sub-`Value`s, if any) to a `std::ostream`.
+
+> :bulb: We mentioned in the lecture that we should never store raw pointers or references.
+> However, if we want our `JsonWriter` class to support global output streams like `std::cout`, it is impossible to store an owning smart pointer.
+> Since a `JsonWriter` is supposed to be a short-lived object who's lifetime can end immediately after calling `accept` on a value, this is a case where storing a raw reference can be justified.
+> There will always be cases where breaking one of the guidelines is fine, just don't make a habit out of it.
+
+> :bulb: The C++17 feature called [_structured bindings_][structured binding] may help in this exercise.
+> It provides an easy syntax to _destructure_ values like `std::pair`.
+> For example:
+> ```cpp
+> auto p = std::pair<int, double>(1, 2.3);
+> auto& [i, d] = p;
+> ```
+> Here, `i` and `d` will be references to the values in `p`.
+
 [gcc]: https://gcc.gnu.org/
 [mingw]: http://www.mingw.org/
 [clang]: https://clang.llvm.org/
@@ -238,3 +319,15 @@ Verify that your implementation works by using it in, for example, [range-based 
 [assignment]: https://en.cppreference.com/w/cpp/language/operator_assignment
 [range for]: https://en.cppreference.com/w/cpp/language/range-for
 [algorithms]: https://en.cppreference.com/w/cpp/algorithm
+[visitor]: https://en.wikipedia.org/wiki/Visitor_pattern
+[json]: https://en.wikipedia.org/wiki/JSON
+[containers]: https://en.cppreference.com/w/cpp/container
+[unique_ptr]: https://en.cppreference.com/w/cpp/memory/unique_ptr
+[type alias]: https://en.cppreference.com/w/cpp/language/type_alias
+[map]: https://en.cppreference.com/w/cpp/container/map
+[unordered_map]: https://en.cppreference.com/w/cpp/container/unordered_map
+[hash]: https://en.cppreference.com/w/cpp/utility/hash
+[pair]: https://en.cppreference.com/w/cpp/utility/pair
+[map insert]: https://en.cppreference.com/w/cpp/container/map/insert
+[structured binding]: https://en.cppreference.com/w/cpp/language/structured_binding
+[forward declaration]: https://en.wikipedia.org/wiki/Forward_declaration

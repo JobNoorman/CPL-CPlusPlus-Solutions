@@ -20,7 +20,7 @@ void JsonWriter::visit(const SeqValue& s) {
     stream_ << '[';
     bool first = true;
 
-    for (const auto& v : s.values) {
+    for (const auto& v : s) {
         if (!first) {
             stream_ << ", ";
         }
@@ -36,7 +36,7 @@ void JsonWriter::visit(const StructValue& s) {
     stream_ << '{';
     bool first = true;
 
-    for (const auto& [key, value] : s.values) {
+    for (const auto& [key, value] : s) {
         if (!first) {
             stream_ << ", ";
         }
