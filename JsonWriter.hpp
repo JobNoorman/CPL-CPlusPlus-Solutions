@@ -1,7 +1,8 @@
 #ifndef CPL_JSONWRITER_HPP
 #define CPL_JSONWRITER_HPP
 
-#include "Data.hpp"
+#include "ValueVisitor.hpp"
+#include "Value.hpp"
 
 #include <iosfwd>
 

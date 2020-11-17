@@ -1,4 +1,6 @@
-#include "Data.hpp"
+#include "Value.hpp"
+
+#include "ValueVisitor.hpp"
 
 BoolValue::BoolValue(bool b) : value(b) {}
 

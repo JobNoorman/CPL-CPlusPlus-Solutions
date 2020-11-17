@@ -1,5 +1,5 @@
-#ifndef CPL_DATA_HPP
-#define CPL_DATA_HPP
+#ifndef CPL_VALUE_HPP
+#define CPL_VALUE_HPP
 
 #include <vector>
 #include <map>
@@ -64,16 +64,6 @@ public:
     std::map<String, std::unique_ptr<Value>> values;
 
     void accept(ValueVisitor& visitor) const override;
-};
-
-class ValueVisitor {
-public:
-
-    virtual void visit(const BoolValue& b) = 0;
-    virtual void visit(const IntValue& i) = 0;
-    virtual void visit(const StringValue& s) = 0;
-    virtual void visit(const SeqValue& s) = 0;
-    virtual void visit(const StructValue& s) = 0;
 };
 
 #endif
