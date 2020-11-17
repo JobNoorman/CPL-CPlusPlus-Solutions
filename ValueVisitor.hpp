@@ -6,6 +6,8 @@
 class ValueVisitor {
 public:
 
+    virtual ~ValueVisitor() = default;
+
     virtual void visit(const BoolValue& b) = 0;
     virtual void visit(const IntValue& i) = 0;
     virtual void visit(const StringValue& s) = 0;
