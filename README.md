@@ -22,7 +22,7 @@
 
 C++ does not come with an official IDE, compiler, or build system.
 To start working with C++, the minimum you need is a compiler and many have been created over the years.
-Since complying C++ compilers should follow the ISO standard, the choice of compiler is often dictated by the platform on which you are building your code, as some compiler might support certain platforms better than others.
+Since complying C++ compilers should follow the ISO standard, the choice of compiler is often dictated by the platform on which you are building your code, as some compilers might support certain platforms better than others.
 Other reasons might be how quickly compilers support the newest standards, how optimized their generated code is, or how fast they are able to compile code.
 
 The three most well-known C++ compilers are:
@@ -35,11 +35,11 @@ The three most well-known C++ compilers are:
   Probably the only possible compiler if you want to use Visual Studio.
   Often a bit slower with picking up the newest standards although this seems to have improved in recent years.
 
-All the exercises in this session have been tested with GCC 9.3.0 and Clang 10.0.
+All the exercises in this session have been tested with GCC 9.3 and Clang 10.0.
 However, any compiler that [supports the core language features of C++17][c++17 support] should work.
 
 This repository includes a file called [`Hello.cpp`](Hello.cpp) which contains the "Hello, world" program shown in the lecture.
-You can compile this file to an executable called `hello` using the following command:
+You can compile this file to an executable called `hello` using one of the following commands:
 - GCC: `g++ Hello.ccp -o hello`
 - Clang: `clang++ Hello.ccp -o hello`
 - Microsoft Visual C++: `cl Hello.cpp /out:hello.exe` (Sorry, not tested.)
@@ -53,7 +53,7 @@ Some "native" build systems include:
 But there are many more.
 In this session, we use [CMake][cmake], a cross-platform build system generator.
 It works by reading a file called [`CMakeLists.txt`](CMakeLists.txt) and generating a native build system for the host platform.
-It supports many different native build systems but the default used is the one shown in the list above.
+It supports many different native build systems but the default used for each platform is the one shown in the list above.
 
 CMake encourages to use a so-called _out of source_ build where all build files are kept in a separate directory.
 The following commands can be run from the directory of this repository to create the native build system:
@@ -78,6 +78,9 @@ Or we can invoke the native build system directly (example for GNU Make):
 $ make
 ```
 
+After compilation, two executable should have been created in the `build` directory: `hello` compiled from `Hello.cpp`, and `exercises`, compiled from `main.cpp` and all other source files used for the exercises.
+You can add code to `main.cpp` to test the various classes created in this session.
+
 The choice for an IDE is often a personal one and I won't enforce the use of any specific tool for this session.
 Of course, a simple text editor is enough to start writing C++ code and the build system can simply be invoked from the command line.
 For the people looking for an editor with some more C++ support, here are some popular ones:
@@ -89,6 +92,10 @@ For the people looking for an editor with some more C++ support, here are some p
 - [Xcode][xcode] on macOS.
 - [Visual Studio][vs] on Windows.
 
+I want to note that I don't have a lot (if any) experience with the latter two, and I've used Qt Creator only a handful of times.
+If you want to use them, I probably won't be able to give a lot of support about their setup.
+But since CMake is a very popular build system, you'll find a lot of support online.
+
 # A simple string implementation
 
 In this exercise, we will create a simple yet fully-functional implementation of a string.
@@ -99,6 +106,7 @@ It will have the following features:
 - Can be streamed to standard output streams.
 
 The class called `String` should be implemented in [`String.hpp`](String.hpp) and [`String.cpp`](String.cpp).
+At every step, verify your implementation by writing test code in [`main.cpp`](main.cpp).
 
 ## Basic constructors and destructors
 
@@ -213,14 +221,15 @@ Experiment a bit with constructing and assigning `String`s in various ways and c
 ## Iterating
 
 Now make sure your `String` supports iterating over its characters by implementing `begin()` and `end()` methods.
-If you want to be able to iterate over `const String`s, also implement `cbegin()` and `cend()` which should return immutable iterators.
+Make sure you can iterate over `const String`s by adding overloads.
 Verify that your implementation works by using it in, for example, [range-based for loops][range for] or by using some [algorithms][algorithms].
+Try, for example, to transform a string to upper case in two ways: one using range-based for loops, and one using [`std::transform`][transform].
 
 > :bulb: Remember that pointers are iterators.
 
 # Visitor pattern
 
-In this exercise, we'll implement the [visitor pattern][visitor] to generate [JSON][json] from a class hierarchy representing generic values.
+In this exercise, we'll implement the [visitor pattern][visitor] to generate [JSON][json] from a class hierarchy representing values.
 
 ## Value hierarchy
 
@@ -248,7 +257,7 @@ The following concrete subclasses should be defined:
   > using IntIterator = std::vector<int>::const_iterator;
   > ```
 - `StructValue`: Represents a mapping from `String`s to `Value`s, again storing the values inside a `std::unique_ptr`.
-  There are two types of map that you can use in C++:
+  There are two types of maps that you can use in C++:
   - [`std::map<K, V>`][map]: Map that sorts its elements based on the key.
     This means that `K` should have `operator<` overloaded.
   - [`std::unordered_map<K, V>`][unordered_map]: Hash-map that requires [`std::hash`][hash] to be specialized for `K`.
@@ -280,7 +289,7 @@ Also implement the necessary `accept` methods in the `Value` hierarchy.
 > You cannot dereference them, though, as the compiler needs to know the contents of the class for that.
 
 Make a class called `JsonWriter` in [`JsonWriter.hpp`](JsonWriter.hpp) and [`JsonWriter.cpp`](JsonWriter.cpp) that implements the `ValueVisitor` interface.
-The goals of this class is to write a JSON representation of a `Value` (and all its sub-`Value`s, if any) to a `std::ostream`.
+The goal of this class is to write a JSON representation of a `Value` (and all its sub-`Value`s, if any) to a `std::ostream`.
 
 > :bulb: We mentioned in the lecture that we should never store raw pointers or references.
 > However, if we want our `JsonWriter` class to support global output streams like `std::cout`, it is impossible to store an owning smart pointer.
@@ -295,6 +304,14 @@ The goals of this class is to write a JSON representation of a `Value` (and all 
 > auto& [i, d] = p;
 > ```
 > Here, `i` and `d` will be references to the values in `p`.
+
+Verify your implementation by creating a `Value` that represents the following JSON and converting it back to JSON:
+```json
+{
+    "seq": [false, "Hello"],
+    "val": 42
+}
+```
 
 # FizzBuzz
 
@@ -340,7 +357,7 @@ Yes, varying the type of a member based on template parameters is possible in C+
 
 First things first: to evaluate the `static_assert`s above, we need a way to compare strings at compile time.
 Since C++11, C++ supports the [`constexpr`][constexpr] specifier that allows us to create, among others, variables and functions that _could_ be evaluated at compile time.
-I say _could_ because these functions may also be used at run-time; only if they are provided with compile-time constants as arguments, they can be evaluated at run-time.
+I say _could_ because these functions may also be used at run-time; only if they are provided with compile-time constants as arguments, they can be evaluated at compile-time.
 
 Initially, `constexpr` functions where very restricted and could essentially contain a single `return` statement.
 They were allowed to be recursive, though, so this could be used to implement our compile-time string equality check.
@@ -352,6 +369,11 @@ constexpr bool equal(const char* s1, const char* s2);
 ```
 
 Verify your implementation by writing some `static_assert`s.
+
+> :bulb: If the compiler needs to evaluate something at compile time, it needs to be able to see the full implementation.
+> This means you cannot put the implementation of `equal` in a `.cpp` file if you want to be able to use it, at compile-time, from another file.
+> This also holds in general for template classes and functions.
+> Both templates and `constexpr` functions should therefore be implemented in header files.
 
 Also make an overload of this function that accepts `unsigned` parameters.
 
@@ -407,6 +429,8 @@ Matrix<int, 1, 2>().determinant(); // compiler error
 Matrix<int, 2, 2>().determinant(); // ok
 ```
 
+Have fun!
+
 [gcc]: https://gcc.gnu.org/
 [mingw]: http://www.mingw.org/
 [clang]: https://clang.llvm.org/
@@ -448,3 +472,4 @@ Matrix<int, 2, 2>().determinant(); // ok
 [fizzbuzz]: https://en.wikipedia.org/wiki/Fizz_buzz
 [static_assert]: https://en.cppreference.com/w/cpp/language/static_assert
 [constexpr]: https://en.cppreference.com/w/cpp/language/constexpr
+[transform]: https://en.cppreference.com/w/cpp/algorithm/transform
