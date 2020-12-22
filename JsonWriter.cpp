@@ -1,5 +1,6 @@
 #include "JsonWriter.hpp"
 
+// <<<
 #include <ostream>
 
 JsonWriter::JsonWriter(std::ostream& stream) : stream_(stream) {}
@@ -49,3 +50,5 @@ void JsonWriter::visit(const StructValue& s) {
 
     stream_ << '}';
 }
+
+// >>>

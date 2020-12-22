@@ -1,6 +1,7 @@
 #ifndef CPL_VALUEVISITOR_HPP
 #define CPL_VALUEVISITOR_HPP
 
+// <<<
 #include "Value.hpp"
 
 class ValueVisitor {
@@ -15,4 +16,5 @@ public:
     virtual void visit(const StructValue& s) = 0;
 };
 
+// >>>
 #endif

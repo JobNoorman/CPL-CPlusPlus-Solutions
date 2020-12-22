@@ -1,10 +1,12 @@
 #ifndef CPL_STRING_HPP
 #define CPL_STRING_HPP
 
+// <<<
 #include <cstddef>
 #include <iosfwd>
-
+// >>>
 class String {
+    // <<<
     public:
 
         String(const char* str = "");
@@ -26,10 +28,12 @@ class String {
     private:
 
         char* str_;
+    // >>>
 };
-
+// <<<
 bool operator<(const String& lhs, const String& rhs);
 
 std::ostream& operator<<(std::ostream& os, const String& str);
+// >>>
 
 #endif

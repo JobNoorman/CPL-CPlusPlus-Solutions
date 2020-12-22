@@ -1,6 +1,7 @@
 #ifndef CPL_JSONWRITER_HPP
 #define CPL_JSONWRITER_HPP
 
+// <<<
 #include "ValueVisitor.hpp"
 #include "Value.hpp"
 
@@ -22,4 +23,5 @@ private:
     std::ostream& stream_;
 };
 
+// >>>
 #endif

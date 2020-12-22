@@ -1,6 +1,7 @@
 #ifndef CPL_FIZZBUZZ_HPP
 #define CPL_FIZZBUZZ_HPP
 
+// <<<
 template<unsigned N, bool Fizz, bool Buzz>
 struct FizzBuzzValue {
     constexpr static unsigned value = N;
@@ -54,6 +55,7 @@ constexpr bool equal(const char* s1, const char* s2) {
     return *s1 == *s2;
 }
 
+// >>>
 static_assert(equal(FizzBuzz< 1>::value, 1u));
 static_assert(equal(FizzBuzz< 2>::value, 2u));
 static_assert(equal(FizzBuzz< 3>::value, "Fizz"));
